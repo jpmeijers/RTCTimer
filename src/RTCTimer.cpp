@@ -45,14 +45,13 @@ RTCTimer::RTCTimer()
 bool RTCEvent::update(uint32_t now)
 {
   bool doneEvent = false;
-  if ( (int32_t)(now - (_lastEventTime + _period)) >= 0
-     || (now < _lastEventTime && now >= _period) ) { // Handle overflow of now
+  if ( now - _lastEventTime >= _period ) { // Handle overflow of now
     //DIAGPRINT(F("RTCEvent::update ")); DIAGPRINTLN(_lastEventTime);
     if (_lastEventTime == 0) {
       // In case this wasn't initialized properly
       _lastEventTime = now;
     } else {
-      while ((int32_t)(now - (_lastEventTime + _period)) >= 0) {
+      while (now - _lastEventTime >= _period) {
         // Skip all the events that are in the past
         _lastEventTime += _period;
       }
@@ -64,11 +63,7 @@ bool RTCEvent::update(uint32_t now)
     default:
       break;
     }
-
-    _count++;
-    if(_count == 0) _count = 1; // handle overflow of count
-
-    if (_repeatCount > 0 && _count >= _repeatCount) {
+    if (_repeatCount > 0 && ++_count >= _repeatCount) {
       // Done. Free the event.
       _eventType = RTCEvent_None;
     }
